@@ -1,0 +1,30 @@
+name: application-checks
+on: [push, pull_request]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: smartstock
+          POSTGRES_DB: smartstock_test
+          POSTGRES_PASSWORD: ci_ephemeral_only
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U smartstock -d smartstock_test" --health-interval 5s --health-timeout 5s --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+      - run: python -m pip install -r requirements-ai.txt
+      - run: python -m compileall -q app.py src
+      - run: python -m alembic upgrade head
+        env:
+          DATABASE_URL: postgresql+psycopg://smartstock:ci_ephemeral_only@localhost:5432/smartstock_test
+      - run: python -m pytest -q
+        env:
+          SMARTSTOCK_TESTING: 'true'
+          ENABLE_EXTERNAL_AI: 'false'
+          ENABLE_WEB_SEARCH: 'false'

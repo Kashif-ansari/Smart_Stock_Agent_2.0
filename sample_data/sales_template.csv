@@ -1,0 +1,6 @@
+date,sku,quantity,product,price,unit_cost,category,customer_id,transaction_id,stockout
+2026-04-07,MILK-1,1,Whole milk 1L,290,231,Dairy,C016,T000-00,False
+2026-04-07,EGGS-12,3,Eggs dozen,380,295,Dairy,C016,T000-00,False
+2026-04-07,BREAD-1,1,Sandwich bread,220,164,Bakery,C016,T000-00,False
+2026-04-07,SUGAR-1,4,Sugar 1kg,175,138,Pantry,C016,T000-01,False
+2026-04-07,BISCUIT-1,3,Tea biscuits,80,54,Snacks,C016,T000-01,False

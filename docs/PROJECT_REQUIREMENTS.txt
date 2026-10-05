@@ -1,0 +1,379 @@
+Act as a senior product manager, Python full-stack developer, machine learning engineer, retail business analyst, LLM/RAG architect, and security engineer.
+
+Create a complete, implementation-ready **Product Requirements Document (PRD), technical architecture, and step-by-step development roadmap** for my project, **Smart Stock Agent**.
+
+Make specific, practical decisions. Explain important trade-offs in simple English. Where information is missing, state reasonable assumptions and continue. Do not stop at an outline or ask unnecessary clarification questions.
+
+Verify current model names, package compatibility, APIs, licenses, and deployment requirements using official documentation. Clearly distinguish verified facts, assumptions, recommendations, and proposed performance targets.
+
+Follow all requirements below.
+
+**1. Project purpose and business goals**
+
+Smart Stock Agent is a business process automation and decision-support platform for general stores selling multiple product categories.
+
+Its main objective is to help owners:
+
+- Buy suitable products at the right time and in appropriate quantities.
+- Forecast future demand and sales.
+- Reduce stockouts, excess inventory, and expiry losses.
+- Improve pricing, profitability, customer retention, and operational efficiency.
+- Discover promising products missing from their assortment.
+- Receive business guidance through an evidence-based chatbot.
+- Manage workflows across sales, finance, HR, and operations.
+
+Here, “stock” means merchandise inventory.
+
+Support journeys from starting a store and planning its initial assortment through daily operations and business expansion. Define realistic capabilities and limitations rather than promising guaranteed business success.
+
+Provide personas, user journeys, scope, non-goals, dependencies, business KPIs, and measurable acceptance criteria. Organize the product into MVP, V1, and V2 without omitting any requested capability.
+
+**2. Required technology stack**
+
+Use:
+
+- Python for application logic and analytics.
+- Streamlit for the multipage website.
+- Groq for supported LLM inference.
+- CrewAI for multi-agent orchestration.
+- FAISS for semantic vector retrieval.
+- BM25 for keyword retrieval.
+- A suitable cross-encoder for reranking.
+- PostgreSQL for business records, permissions, workflow state, and audit logs.
+- SQLAlchemy and Alembic for database access and migrations.
+- Suitable libraries for forecasting, machine learning, extraction, OCR, visualization, and document generation.
+
+Choose a background worker and scheduler for long-running jobs. Explain retries, cancellation, status tracking, and duplicate prevention.
+
+Decide whether FastAPI is necessary and justify the choice. Keep business logic separate from Streamlit pages.
+
+Specify compatible dependencies, environment variables, deployment requirements, CPU/GPU needs, and an affordable local-development configuration. Keep expensive processing and repeated model loading outside Streamlit reruns.
+
+**3. Uploading and preparing business data**
+
+Design a dedicated **Upload & Data Quality** page.
+
+Support CSV, XLSX, XLS, and TSV. Assess other structured formats and spreadsheet connectors as extensions. Explain supported formats rather than promising every possible file type.
+
+Define this workflow:
+
+Upload → file validation → preview → column mapping → cleaning → schema validation → transformation → quality report → versioned storage → feature generation.
+
+Include:
+
+- Multiple sheets and different column names.
+- Date formats, time zones, currencies, and measurement units.
+- Missing values, duplicate imports, returns, discounts, and outliers.
+- Irregular dates, changing SKUs, and missing product identifiers.
+- Raw-data preservation and transformation history.
+- User confirmation for ambiguous mappings.
+- Rejected-row reports and downloadable corrected data.
+
+Define a canonical sales schema. Minimum unit-sales forecasting fields should include date/timestamp, product identifier, and quantity. Identify conditional fields needed for revenue, customer analysis, basket analysis, margins, supplier planning, and inventory decisions.
+
+Distinguish zero sales, missing records, store closures, and stockouts. Explain that sales during stockouts may understate actual demand.
+
+Provide an example upload template, mapping example, validated dataset, and a matrix showing which features require which fields. Do not fabricate missing customer IDs, costs, lead times, or inventory records.
+
+**4. Demand forecasting and model selection**
+
+Recommend the best-suited Hugging Face forecasting model based on retail-data benchmarking.
+
+Evaluate `amazon/chronos-2` as an initial candidate and assess a lighter alternative when hardware requires it. Verify model capabilities, licenses, covariate support, inference requirements, and actual hosting availability.
+
+Compare suitable candidates against:
+
+- Seasonal naive forecasting.
+- ARIMA/SARIMA/SARIMAX.
+- Prophet.
+- Exponential smoothing, including ETS/Holt-Winters.
+- Intermittent-demand methods when appropriate.
+- A lag-feature machine learning model where useful.
+
+For each model, explain its purpose, inputs, minimum history, strengths, limitations, computational cost, and fallback behavior.
+
+Support configurable daily and weekly forecasting with practical 7-, 14-, 30-, and 90-day horizons.
+
+Address seasonality, holidays, promotions, new products, sparse demand, stockouts, known future variables, and SKU/store/category aggregation.
+
+Use chronological rolling-origin backtesting and prevent data leakage. Include appropriate error metrics, forecast bias, prediction intervals, and uncertainty calibration.
+
+Select the model using measured performance and operating constraints. Do not claim one model is universally best.
+
+The chatbot must obtain numerical forecasts from forecasting tools. It must not generate fictional predictions through the LLM.
+
+**5. Inventory optimization and dynamic pricing**
+
+Include:
+
+- Economic Order Quantity: EOQ.
+- Reorder Point: ROP.
+- Safety stock.
+- Reorder quantities and days of cover.
+- Low-stock and overstock alerts.
+- Expiry management.
+- Supplier comparisons.
+- Draft purchase orders.
+- Dynamic pricing recommendations.
+
+Provide correct formulas, consistent units, assumptions, required data, and worked examples.
+
+Explain how lead times, demand uncertainty, on-hand inventory, incoming orders, reservations, and backorders affect replenishment. Prevent double counting.
+
+Respect cash budgets, supplier minimum quantities, pack sizes, storage capacity, product shelf life, and delivery uncertainty.
+
+For dynamic pricing, define margin floors, allowed price ranges, approval rules, competitor evidence, and evaluation methods. Explain that historical price correlations do not automatically establish causal demand response.
+
+Begin with reviewable recommendations and simulations. Require approval before executing purchases or changing live prices.
+
+**6. Customer and sales analytics**
+
+Include:
+
+- RFM analysis.
+- K-Means customer segmentation.
+- Customer churn prediction.
+- Market-basket analysis using Apriori or FP-Growth.
+- Product bundles and cross-selling recommendations.
+
+Specify each feature’s business question, required data, preprocessing, model, output, evaluation, and recommended action.
+
+For churn, define inactivity, observation windows, prediction horizons, labels, and leakage-safe evaluation. Compare suitable baseline and supervised models.
+
+Customer-level analysis requires stable customer identifiers and repeat-purchase history. Explain what remains possible with anonymous transaction data.
+
+Basket analysis requires transaction-level item groupings. Include support, confidence, lift, and minimum evidence requirements.
+
+Disable unsupported features gracefully and explain what additional data the owner needs.
+
+**7. Business chatbot and knowledge extraction**
+
+Build a chatbot that answers questions about inventory, sales, procurement, pricing, customers, finance, operations, and business planning.
+
+Ground answers in authorized business records, uploaded documents, approved knowledge, and verified external research.
+
+Explain the distinction between:
+
+- Using an existing LLM.
+- Retrieval-Augmented Generation.
+- Fine-tuning an LLM.
+- Training forecasting or classification models.
+
+Use RAG initially. Treat fine-tuning as an optional later decision requiring suitable data, permission, evaluation, and measurable benefit.
+
+Specify extraction from PDF, DOCX, TXT, Markdown, approved web pages, spreadsheets, and scanned documents through OCR.
+
+Preserve headings, tables, reading order, page numbers, sheet names, and row references where available. Include extraction-quality checks and user review for uncertain OCR.
+
+Define the ingestion pipeline:
+
+Extraction → cleanup → deduplication → structure-aware chunking → metadata → embeddings → indexing.
+
+Select suitable embedding and reranking models. Evaluate language support if English, Urdu, or Roman Urdu is included.
+
+Give initial chunk-size and overlap settings as tunable parameters, with a plan for measuring retrieval quality.
+
+**8. FAISS storage and hybrid retrieval**
+
+Persist the vector index in protected folders, for example:
+
+`storage/vectorstores/{tenant_id}/{corpus_id}/{index_version}/`
+
+Specify storage for the FAISS index, chunk IDs, document metadata, keyword-search assets, embedding configuration, checksums, and build manifests.
+
+Explain updates, deletion, rebuilding, versioning, backups, concurrent access, and recovery.
+
+Use this retrieval pipeline:
+
+Authorize request → select permitted corpus → normalize query → keyword search and semantic search → result fusion → reranking → evidence selection → grounded answer → citation verification.
+
+Preserve exact matching for SKUs, invoice numbers, brands, and product codes.
+
+Use database queries and calculation tools for exact totals and inventory quantities. Do not calculate business totals from approximate text retrieval.
+
+Enforce tenant and document permissions before information enters reranking, LLM context, caches, or responses.
+
+Include source attribution, conflicting-source handling, stale-source detection, insufficient-evidence responses, and isolated conversation history.
+
+**9. Dedicated Market Research Agent**
+
+Create a separate agent that uses a maintained DuckDuckGo-capable search integration.
+
+If using `ddgs`, verify its current interface and configure the intended DuckDuckGo backend explicitly.
+
+The agent should:
+
+- Research product trends, seasonal opportunities, and competitor prices.
+- Identify relevant products absent from the store’s assortment.
+- Distinguish a product not carried from a temporarily out-of-stock product.
+- Match brand, variant, size, and unit correctly.
+- Check local relevance, supplier availability, likely margins, and inventory risks.
+- Recommend a small pilot purchase when evidence supports it.
+
+Include URLs, publication dates when available, retrieval timestamps, evidence, assumptions, and limitations.
+
+Do not describe search popularity or advertising as verified sales. “Best-selling” claims require suitable supporting evidence with an identified market and period.
+
+For products without sales history, label quantity recommendations as uncertain scenarios.
+
+Include rate limits, unavailable-search behavior, notification preferences, snooze/dismiss controls, and rules preventing repeated recommendations.
+
+**10. Multi-agent system**
+
+Design appropriately scoped roles for:
+
+- Orchestrator.
+- Market research.
+- Sales and customer retention.
+- Forecasting and analysis.
+- Operations, inventory, and procurement.
+- Finance.
+- HR support.
+- Writing and reporting.
+- Independent review.
+
+Provide a knowledge-retrieval capability and justify whether it should be an agent or a deterministic tool.
+
+For EVERY agent, specify:
+
+Role, goal, tasks, input, workflow, tools, state/memory, output schema, triggers, dependencies, permissions, failure handling, escalation, and success criteria.
+
+Use this unified pipeline:
+
+User input and authorization → research → analysis and calculations → verification → organization and writing → reviewer → final report.
+
+Implement structured handoffs, persisted workflow state, timeouts, bounded retries, and review outcomes.
+
+Simple questions should use a short path. Do not run every agent for every request.
+
+The reviewer must check evidence, arithmetic, citations, completeness, contradictions, access permissions, and requested format. Failed checks return to the responsible stage within a defined retry limit.
+
+LLM review must complement deterministic validation rather than serve as proof of accuracy.
+
+**11. Business process automation**
+
+Define workflows for scheduled forecasts, replenishment alerts, purchase drafts, expiry reviews, price proposals, customer campaigns, finance summaries, staffing support, and market research.
+
+For each workflow, specify:
+
+Trigger, schedule/timezone, required inputs, conditions, responsible service, output, approval rules, audit events, retries, duplicate prevention, notification settings, and cancellation.
+
+Clearly distinguish recommendations, drafts awaiting approval, and authorized actions.
+
+Tie approval to the exact proposed action and recheck approval when material inputs change.
+
+**12. Website pages and visual design**
+
+Provide a sitemap and detailed specifications for:
+
+- Home.
+- About Us with six team-member profiles.
+- Sign-in and onboarding.
+- Business Dashboard.
+- Upload & Data Quality.
+- Demand Forecasting.
+- Inventory & Reordering.
+- Business Chatbot.
+- Customer Insights.
+- Market Opportunities.
+- Sales & Pricing.
+- Finance.
+- HR & Operations.
+- Reports & Downloads.
+- Automation & Approvals.
+- Settings & Administration.
+
+Assign each page to MVP, V1, or V2.
+
+For each page, describe components, user actions, permissions, data dependencies, navigation, and loading/empty/error states.
+
+Use placeholders for member names, photos, and biographies.
+
+Use this three-color brand palette:
+
+- Navy: `#0F172A`.
+- Teal: `#0F766E`.
+- Amber: `#F59E0B`.
+
+Use neutral backgrounds and accessible contrast. Explain typography, spacing, chart design, keyboard navigation, and responsive behavior. Keep the interface understandable to business owners.
+
+**13. Database and modular file architecture**
+
+Provide an ERD and data dictionary covering users, organizations/stores, memberships, roles, products, suppliers, sales, transaction items, customers, inventory movements, purchase orders, dataset versions, model runs, forecasts, recommendations, documents, chunks, agent runs, research evidence, approvals, reports, jobs, and audit logs.
+
+Explain relationships, constraints, indexes, migrations, tenant isolation, transaction consistency, and corrections.
+
+Provide a complete project folder/file tree with separate files for every page and feature.
+
+Separate UI, configuration, database access, authentication, authorization, ingestion, forecasting, inventory calculations, customer analytics, RAG, agents, integrations, exports, background jobs, tests, and deployment.
+
+Explain each important file’s responsibility and interface. Include dependency configuration, an environment-variable template, README, synthetic sample data, Docker configuration, and CI.
+
+**14. Output formats**
+
+Support text, tables, charts, Word/DOCX, PDF, Excel/XLSX, and CSV where appropriate.
+
+Use a shared structured report object to keep figures consistent across formats.
+
+Include timestamps, reporting periods, source references, dataset/model versions, units, assumptions, limitations, and approval status.
+
+Specify document-generation libraries, protected downloads, retention, and export validation.
+
+Preserve numeric/date types in Excel and prevent spreadsheet formula injection from untrusted values.
+
+**15. Security, privacy, and governance**
+
+Define authentication and authorization separately.
+
+Prefer a supported identity provider and enforce server-side role and resource permissions. Include an explicit permission matrix for owners, managers, sales/inventory staff, finance, HR, and analysts.
+
+Cover tenant isolation, session revocation, MFA where supported, secret management, encryption, rate limits, safe uploads, SQL injection, XSS, CSRF, SSRF, path traversal, and unsafe deserialization.
+
+Treat uploaded and retrieved content as untrusted. Include prompt-injection defenses, tool allowlists, structured argument validation, and restricted database tools.
+
+Do not execute arbitrary model-generated code or document macros.
+
+Prevent leaks through caches, logs, chat history, retrieval, exports, and third-party calls. Define what may be sent to Groq and search services. Exclude confidential data from public search queries.
+
+Specify ownership, retention, deletion, consent where applicable, audit trails, backups, incident handling, model/prompt versioning, and human oversight.
+
+Identify jurisdiction-dependent compliance questions without claiming legal compliance.
+
+**16. Evaluation and release criteria**
+
+Create a quality matrix covering:
+
+- Evidence: provenance, freshness, and claim support.
+- Accuracy: checked calculations, forecasting performance, and grounded answers.
+- Completeness: coverage of questions, constraints, and requested outputs.
+- Quality: clarity, usability, and actionable recommendations.
+- Efficiency: latency, cost, tool calls, resource usage, and owner time saved.
+
+For each measure, provide its definition, evaluation dataset, proposed target, test method, release gate, and monitoring owner.
+
+Include forecasting backtests, retrieval evaluation, citation checks, permission tests, prompt-injection tests, malformed uploads, unavailable APIs, duplicate jobs, data deletion, and export consistency.
+
+Label targets as proposed until measured. Do not invent accuracy percentages.
+
+**17. Step-by-step development guide**
+
+Finish with an ordered implementation roadmap covering setup, database, identity, pages, data ingestion, baseline forecasting, inventory calculations, model benchmarking, customer analytics, document extraction, hybrid search, chatbot, agents, market research, exports, approvals, security hardening, deployment, and monitoring.
+
+For EACH step, provide:
+
+1. Objective and prerequisites.
+2. Exact files to create or modify.
+3. Commands where appropriate.
+4. Interfaces and implementation actions.
+5. A small verification procedure.
+6. Expected result and completion criteria.
+
+Include a phased schedule, dependencies, six-member task allocation using placeholders, shared interfaces, Git/PR workflow, integration milestones, operating-cost assumptions, and risks.
+
+Identify the first week’s tasks and the first usable demo:
+
+Sign in → upload sales → validate data → forecast demand → recommend replenishment → explain with evidence → download a report.
+
+Finish with a traceability matrix mapping every requested feature to its requirement, phase, owner, and acceptance test.
+
+Deliver the complete PRD and development guide now. Keep the result coherent, practical, and detailed enough for a six-member team to begin implementation.
